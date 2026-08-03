@@ -27,6 +27,7 @@ export async function createTask(formData: FormData) {
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/board");
 }
 
 export async function toggleTask(taskId: string) {
@@ -47,6 +48,7 @@ export async function toggleTask(taskId: string) {
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/board");
 }
 
 export async function updateTaskStatus(taskId: string, status: TaskStatus) {
@@ -65,6 +67,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/board");
 }
 
 export async function deleteTask(taskId: string) {
@@ -76,4 +79,5 @@ export async function deleteTask(taskId: string) {
 
   await prisma.task.delete({ where: { id: taskId } });
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/board");
 }
