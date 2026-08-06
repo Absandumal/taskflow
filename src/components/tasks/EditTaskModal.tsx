@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { updateTask } from "@/app/actions/tasks";
+
 import { Task, Project } from "@prisma/client";
 import { X } from "lucide-react";
+import { updateTaskWithToast } from "@/components/ui/toast-actions";
 
 type TaskWithProject = Task & {
   project?: { id: string; name: string } | null;
@@ -19,8 +20,8 @@ export function EditTaskModal({
   const [open, setOpen] = useState(false);
 
   async function handleSubmit(formData: FormData) {
-    await updateTask(formData);
-    setOpen(false);
+  await updateTaskWithToast(formData);
+  setOpen(false);
   }
 
   return (
