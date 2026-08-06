@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { deleteTaskWithToast } from "@/components/ui/toast-actions";
+import { deleteProjectWithToast } from "@/components/ui/toast-actions";
 
-export function DeleteTaskButton({
-  taskId,
-  taskTitle,
+export function DeleteProjectButton({
+  projectId,
+  projectName,
 }: {
-  taskId: string;
-  taskTitle?: string;
+  projectId: string;
+  projectName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export function DeleteTaskButton({
   async function handleConfirm() {
     setLoading(true);
     try {
-      await deleteTaskWithToast(taskId);
+      await deleteProjectWithToast(projectId);
       setOpen(false);
     } finally {
       setLoading(false);
@@ -28,7 +28,7 @@ export function DeleteTaskButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--destructive)]"
+        className="text-xs text-[var(--muted-foreground)] opacity-0 transition-opacity hover:text-[var(--destructive)] group-hover:opacity-100"
       >
         Delete
       </button>
@@ -41,18 +41,19 @@ export function DeleteTaskButton({
           />
 
           <div className="relative w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold">Delete task?</h2>
+            <h2 className="text-lg font-semibold">Delete project?</h2>
             <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              {taskTitle ? (
+              {projectName ? (
                 <>
                   This will permanently delete{" "}
                   <span className="font-medium text-[var(--foreground)]">
-                    &ldquo;{taskTitle}&rdquo;
+                    &ldquo;{projectName}&rdquo;
                   </span>
-                  . This cannot be undone.
+                  . Tasks in this project will not be deleted, but will become
+                  unassigned. This cannot be undone.
                 </>
               ) : (
-                "This will permanently delete this task. This cannot be undone."
+                "This will permanently delete this project. This cannot be undone."
               )}
             </p>
 

@@ -10,6 +10,7 @@ import { EditTaskModal } from "@/components/tasks/EditTaskModal";
 import { CreateTaskForm } from "@/components/tasks/CreateTaskForm";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 
+
 export default async function TasksPage({
   searchParams,
 }: {
@@ -171,7 +172,7 @@ export default async function TasksPage({
                   {/* Actions */}
                   <div className="flex items-center gap-3">
                     <EditTaskModal task={task} projects={projects} />
-                    <DeleteTaskButton taskId={task.id} />
+                    <DeleteTaskButton taskId={task.id} taskTitle={task.title}/>
                   </div>
                 </li>
               ))}
