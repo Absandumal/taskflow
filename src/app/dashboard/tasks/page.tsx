@@ -6,6 +6,7 @@ import { PriorityBadge } from "@/components/tasks/PriorityBadge";
 import { StatusBadge } from "@/components/tasks/StatusBadge";
 import { createTask, toggleTask, deleteTask } from "@/app/actions/tasks";
 import { format } from "date-fns";
+import { EditTaskModal } from "@/components/tasks/EditTaskModal";
 
 export default async function TasksPage({
   searchParams,
@@ -20,7 +21,15 @@ export default async function TasksPage({
 
   const allTasks = await prisma.task.findMany({
     where: { userId: session.user.id },
+    include: {
+      project: { select: { id: true, name: true } },
+    },
     orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
+  });
+
+  const projects = await prisma.project.findMany({
+    where: { userId: session.user.id },
+    orderBy: { name: "asc" },
   });
 
   const tasks =
@@ -33,7 +42,8 @@ export default async function TasksPage({
   const counts = {
     all: allTasks.length,
     active: allTasks.filter((t) => t.status !== "DONE" && !t.completed).length,
-    completed: allTasks.filter((t) => t.status === "DONE" || t.completed).length,
+    completed: allTasks.filter((t) => t.status === "DONE" || t.completed)
+      .length,
   };
 
   return (
@@ -48,7 +58,7 @@ export default async function TasksPage({
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex flex-wrap gap-2">
           {[
             { key: "all", label: "All", count: counts.all },
             { key: "active", label: "Active", count: counts.active },
@@ -71,14 +81,18 @@ export default async function TasksPage({
 
         {/* Quick Add */}
         <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-          <form action={createTask} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <form
+            action={createTask}
+            className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center"
+          >
             <input
               type="text"
               name="title"
               placeholder="Add a new task..."
               required
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              className="min-w-[200px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
             />
+
             <select
               name="priority"
               defaultValue="MEDIUM"
@@ -89,11 +103,25 @@ export default async function TasksPage({
               <option value="HIGH">High</option>
               <option value="URGENT">Urgent</option>
             </select>
+
+            <select
+              name="projectId"
+              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            >
+              <option value="">No project</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+
             <input
               type="date"
               name="dueDate"
               className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
             />
+
             <button
               type="submit"
               className="rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-[var(--primary-foreground)] transition-opacity hover:opacity-90"
@@ -123,7 +151,10 @@ export default async function TasksPage({
                   className="flex items-start gap-4 border-b border-[var(--border)] px-5 py-4 last:border-b-0"
                 >
                   {/* Checkbox */}
-                  <form action={toggleTask.bind(null, task.id)} className="mt-0.5">
+                  <form
+                    action={toggleTask.bind(null, task.id)}
+                    className="mt-0.5"
+                  >
                     <button
                       type="submit"
                       className={`flex h-5 w-5 items-center justify-center rounded-md border transition-colors ${
@@ -172,22 +203,28 @@ export default async function TasksPage({
                       </p>
                     )}
 
-                    {task.dueDate && (
-                      <p className="mt-1.5 text-xs text-[var(--muted-foreground)]">
-                        Due {format(new Date(task.dueDate), "MMM d, yyyy")}
-                      </p>
-                    )}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                      {task.project && <span>{task.project.name}</span>}
+                      {task.dueDate && (
+                        <span>
+                          Due {format(new Date(task.dueDate), "MMM d, yyyy")}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Delete */}
-                  <form action={deleteTask.bind(null, task.id)}>
-                    <button
-                      type="submit"
-                      className="text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--destructive)]"
-                    >
-                      Delete
-                    </button>
-                  </form>
+                  {/* Actions */}
+                  <div className="flex items-center gap-3">
+                    <EditTaskModal task={task} projects={projects} />
+                    <form action={deleteTask.bind(null, task.id)}>
+                      <button
+                        type="submit"
+                        className="text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--destructive)]"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
                 </li>
               ))}
             </ul>
