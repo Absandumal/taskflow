@@ -1,5 +1,6 @@
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { CommandPalette } from "@/components/search/CommandPalette";
 
 export function AppShell({
   children,
@@ -15,6 +16,7 @@ export function AppShell({
         <Topbar userName={userName} />
         <main className="p-6 md:p-8">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { TaskStatus, Priority } from "@prisma/client";
+import { logActivity } from "@/lib/activity";
 
 export async function createTask(formData: FormData) {
   const session = await auth();
@@ -15,6 +16,7 @@ export async function createTask(formData: FormData) {
   const description = (formData.get("description") as string) || null;
   const priority = (formData.get("priority") as Priority) || "MEDIUM";
   const dueDateRaw = formData.get("dueDate") as string;
+  await logActivity(session.user.id, "task_created", `Created task "${title.trim()}"`);
 
   await prisma.task.create({
     data: {

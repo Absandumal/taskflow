@@ -1,6 +1,5 @@
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
-import { signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createTask, toggleTask, deleteTask } from "@/app/actions/tasks";
 import { AppShell } from "@/components/layout/AppShell";
@@ -11,135 +10,269 @@ import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
 
   const tasks = await prisma.task.findMany({
     where: { userId: session.user.id },
     orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
   });
 
+  const activities = await prisma.activity.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
+
   const firstName = session.user.name?.split(" ")[0] || "there";
   const today = format(new Date(), "EEEE, MMMM d");
 
   const total = tasks.length;
-  const completed = tasks.filter((t) => t.completed || t.status === "DONE").length;
-  const inProgress = tasks.filter((t) => t.status === "IN_PROGRESS").length;
-  const todo = tasks.filter((t) => t.status === "TODO").length;
+  const completed = tasks.filter(
+    (task) => task.completed || task.status === "DONE"
+  ).length;
+  const inProgress = tasks.filter(
+    (task) => task.status === "IN_PROGRESS"
+  ).length;
+  const todo = tasks.filter((task) => task.status === "TODO").length;
 
-  // Tasks that are not done
-  const activeTasks = tasks.filter((t) => t.status !== "DONE" && !t.completed);
+  const activeTasks = tasks.filter(
+    (task) => task.status !== "DONE" && !task.completed
+  );
+
+  const completionRate =
+    total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
     <AppShell userName={session.user.name || session.user.email}>
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto w-full max-w-6xl px-1 pb-10">
+        {/* -------------------------------------------------- */}
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm text-[var(--muted-foreground)]">{today}</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-              Good morning, {firstName} 👋
-            </h1>
-            <p className="mt-1 text-[var(--muted-foreground)]">
-              Here&apos;s what&apos;s happening with your work today.
-            </p>
-          </div>
+        {/* -------------------------------------------------- */}
+        <header className="mb-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--muted-foreground)]">
+                {today}
+              </p>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/board"
-              className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--muted)]"
-            >
-              Open Board
-            </Link>
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/login" });
-              }}
-            >
-              <button
-                type="submit"
-                className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Good morning, {firstName}{" "}
+                <span className="inline-block">👋</span>
+              </h1>
+
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted-foreground)] sm:text-base">
+                Here&apos;s an overview of your tasks and what needs your
+                attention today.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard/board"
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-medium transition-colors hover:bg-[var(--muted)]"
               >
-                Logout
-              </button>
-            </form>
-          </div>
-        </div>
+                Open Board
+              </Link>
 
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/login" });
+                }}
+              >
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                >
+                  Logout
+                </button>
+              </form>
+            </div>
+          </div>
+        </header>
+
+        {/* -------------------------------------------------- */}
         {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-            <p className="text-sm text-[var(--muted-foreground)]">Total</p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">{total}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-            <p className="text-sm text-[var(--muted-foreground)]">To Do</p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">{todo}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-            <p className="text-sm text-[var(--muted-foreground)]">In Progress</p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">{inProgress}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-            <p className="text-sm text-[var(--muted-foreground)]">Completed</p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">{completed}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          {/* Left: Create + Active Tasks */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Create Task */}
+        {/* -------------------------------------------------- */}
+        <section className="mb-8">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {/* Total */}
             <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-              <h2 className="mb-4 text-sm font-medium">Quick Add</h2>
-              <form action={createTask} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  Total tasks
+                </p>
+
+                <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                  All
+                </span>
+              </div>
+
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {total}
+              </p>
+
+              <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                Tasks in your workspace
+              </p>
+            </div>
+
+            {/* To Do */}
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+              <p className="text-sm text-[var(--muted-foreground)]">
+                To do
+              </p>
+
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {todo}
+              </p>
+
+              <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                Waiting to be started
+              </p>
+            </div>
+
+            {/* In Progress */}
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+              <p className="text-sm text-[var(--muted-foreground)]">
+                In progress
+              </p>
+
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {inProgress}
+              </p>
+
+              <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                Currently being worked on
+              </p>
+            </div>
+
+            {/* Completion */}
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  Completed
+                </p>
+
+                <span className="text-xs font-medium">
+                  {completionRate}%
+                </span>
+              </div>
+
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {completed}
+              </p>
+
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]">
+                <div
+                  className="h-full rounded-full bg-[var(--primary)] transition-all"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* -------------------------------------------------- */}
+        {/* Main Content */}
+        {/* -------------------------------------------------- */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+          {/* ================================================== */}
+          {/* Left Column */}
+          {/* ================================================== */}
+          <div className="min-w-0 space-y-6 lg:col-span-3">
+            {/* Quick Add */}
+            <section className="rounded-xl border border-[var(--border)] bg-[var(--card)]">
+              <div className="border-b border-[var(--border)] px-5 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-sm font-semibold">
+                      Create a task
+                    </h2>
+
+                    <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                      Add something you want to get done.
+                    </p>
+                  </div>
+
+                  <span className="hidden rounded-md bg-[var(--muted)] px-2 py-1 text-[11px] font-medium text-[var(--muted-foreground)] sm:inline-flex">
+                    Quick add
+                  </span>
+                </div>
+              </div>
+
+              <form action={createTask} className="p-5">
                 <input
                   type="text"
                   name="title"
                   placeholder="What needs to be done?"
                   required
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                  className="h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 text-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
                 />
-                <div className="flex flex-wrap gap-3">
+
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row">
                   <select
                     name="priority"
                     defaultValue="MEDIUM"
-                    className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="h-10 flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
                   >
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
-                    <option value="URGENT">Urgent</option>
+                    <option value="LOW">Low priority</option>
+                    <option value="MEDIUM">Medium priority</option>
+                    <option value="HIGH">High priority</option>
+                    <option value="URGENT">Urgent priority</option>
                   </select>
+
                   <input
                     type="date"
                     name="dueDate"
-                    className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="h-10 flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
                   />
+
                   <button
                     type="submit"
-                    className="ml-auto rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-medium text-[var(--primary-foreground)] transition-opacity hover:opacity-90"
+                    className="h-10 rounded-lg bg-[var(--primary)] px-5 text-sm font-medium text-[var(--primary-foreground)] transition-opacity hover:opacity-90 sm:min-w-[110px]"
                   >
                     Add Task
                   </button>
                 </div>
               </form>
-            </div>
+            </section>
 
             {/* Active Tasks */}
-            <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
-              <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
-                <h2 className="text-sm font-medium">Active Tasks</h2>
-                <span className="text-xs text-[var(--muted-foreground)]">
-                  {activeTasks.length} remaining
-                </span>
+            <section className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+              <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
+                <div>
+                  <h2 className="text-sm font-semibold">Active tasks</h2>
+
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    The work currently on your plate.
+                  </p>
+                </div>
+
+                <Link
+                  href="/dashboard/tasks"
+                  className="text-xs font-medium text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
+                >
+                  View all →
+                </Link>
               </div>
 
               {activeTasks.length === 0 ? (
-                <div className="px-6 py-14 text-center">
-                  <p className="text-[var(--muted-foreground)]">
-                    You&apos;re all caught up. Nice work.
+                <div className="px-6 py-16 text-center">
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)]">
+                    ✓
+                  </div>
+
+                  <h3 className="mt-4 text-sm font-semibold">
+                    You&apos;re all caught up
+                  </h3>
+
+                  <p className="mx-auto mt-1 max-w-xs text-sm text-[var(--muted-foreground)]">
+                    Nice work. Create a new task when you&apos;re ready for
+                    the next one.
                   </p>
                 </div>
               ) : (
@@ -147,32 +280,47 @@ export default async function DashboardPage() {
                   {activeTasks.slice(0, 8).map((task) => (
                     <li
                       key={task.id}
-                      className="flex items-start gap-4 border-b border-[var(--border)] px-5 py-4 last:border-b-0"
+                      className="group flex items-start gap-3 border-b border-[var(--border)] px-5 py-4 last:border-b-0"
                     >
-                      <form action={toggleTask.bind(null, task.id)} className="mt-0.5">
+                      {/* Complete */}
+                      <form
+                        action={toggleTask.bind(null, task.id)}
+                        className="mt-0.5 shrink-0"
+                      >
                         <button
                           type="submit"
-                          className="flex h-5 w-5 items-center justify-center rounded-md border border-[var(--border)] transition-colors hover:border-[var(--muted-foreground)]"
+                          aria-label={`Complete ${task.title}`}
+                          className="flex h-5 w-5 items-center justify-center rounded-md border border-[var(--border)] transition hover:border-[var(--foreground)] hover:bg-[var(--muted)]"
                         />
                       </form>
 
+                      {/* Task Content */}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-medium">{task.title}</span>
+                          <span className="truncate text-sm font-medium">
+                            {task.title}
+                          </span>
+
                           <StatusBadge status={task.status} />
                           <PriorityBadge priority={task.priority} />
                         </div>
+
                         {task.dueDate && (
-                          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                            Due {format(new Date(task.dueDate), "MMM d")}
+                          <p className="mt-1.5 text-xs text-[var(--muted-foreground)]">
+                            Due{" "}
+                            {format(new Date(task.dueDate), "MMM d")}
                           </p>
                         )}
                       </div>
 
-                      <form action={deleteTask.bind(null, task.id)}>
+                      {/* Delete */}
+                      <form
+                        action={deleteTask.bind(null, task.id)}
+                        className="shrink-0 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100"
+                      >
                         <button
                           type="submit"
-                          className="text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--destructive)]"
+                          className="rounded-md px-2 py-1 text-xs font-medium text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--destructive)]"
                         >
                           Delete
                         </button>
@@ -181,46 +329,98 @@ export default async function DashboardPage() {
                   ))}
                 </ul>
               )}
-            </div>
+            </section>
           </div>
 
-          {/* Right: Recently Completed */}
-          <div className="lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
-              <div className="border-b border-[var(--border)] px-5 py-3">
-                <h2 className="text-sm font-medium">Recently Completed</h2>
+          {/* ================================================== */}
+          {/* Right Column */}
+          {/* ================================================== */}
+          <aside className="min-w-0 lg:col-span-2">
+            <section className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+              <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
+                <div>
+                  <h2 className="text-sm font-semibold">
+                    Recent activity
+                  </h2>
+
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Your latest actions.
+                  </p>
+                </div>
               </div>
 
-              {completed === 0 ? (
+              {activities.length === 0 ? (
                 <div className="px-6 py-14 text-center">
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Completed tasks will appear here.
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] text-sm">
+                    •
+                  </div>
+
+                  <p className="mt-4 text-sm font-medium">
+                    No activity yet
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
+                    Your activity will appear here as you work.
                   </p>
                 </div>
               ) : (
                 <ul>
-                  {tasks
-                    .filter((t) => t.completed || t.status === "DONE")
-                    .slice(0, 6)
-                    .map((task) => (
-                      <li
-                        key={task.id}
-                        className="flex items-center gap-3 border-b border-[var(--border)] px-5 py-3.5 last:border-b-0"
-                      >
-                        <div className="flex h-5 w-5 items-center justify-center rounded-md border border-[var(--success)] bg-[var(--success)] text-white">
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <span className="text-sm text-[var(--muted-foreground)] line-through">
-                          {task.title}
-                        </span>
-                      </li>
-                    ))}
+                  {activities.map((activity) => (
+                    <li
+                      key={activity.id}
+                      className="flex gap-3 border-b border-[var(--border)] px-5 py-4 last:border-b-0"
+                    >
+                      <div className="mt-1.5 flex h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm leading-5">
+                          {activity.message}
+                        </p>
+
+                        <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                          {format(
+                            new Date(activity.createdAt),
+                            "MMM d · h:mm a"
+                          )}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               )}
-            </div>
-          </div>
+            </section>
+
+            {/* Productivity Summary */}
+            <section className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold">
+                    Productivity
+                  </h2>
+
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Your current completion rate.
+                  </p>
+                </div>
+
+                <span className="text-2xl font-semibold tracking-tight">
+                  {completionRate}%
+                </span>
+              </div>
+
+              <div className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--muted)]">
+                <div
+                  className="h-full rounded-full bg-[var(--primary)] transition-all"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+                <span>{completed} completed</span>
+                <span>{total - completed} remaining</span>
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
     </AppShell>

@@ -9,7 +9,12 @@ export function Topbar({ userName }: { userName?: string | null }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-[var(--card)]/80 backdrop-blur-md px-6">
       {/* Search trigger */}
-      <button className="flex w-64 items-center gap-2 rounded-lg border bg-[var(--muted)]/50 px-3 py-1.5 text-sm text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)]">
+      <button
+        onClick={() => {
+          window.dispatchEvent(new KeyboardEvent("keydown", { key: "/" }));
+        }}
+        className="flex w-64 items-center gap-2 rounded-lg border bg-[var(--muted)]/50 px-3 py-1.5 text-sm text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)]"
+      >
         <Search className="h-4 w-4" />
         <span>Search...</span>
         <kbd className="ml-auto rounded border bg-[var(--card)] px-1.5 text-xs">

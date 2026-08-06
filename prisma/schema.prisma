@@ -17,6 +17,7 @@ model User {
   sessions      Session[]
   tasks         Task[]
   projects Project[]
+  activities Activity[]
   createdAt     DateTime  @default(now())
 }
 
@@ -107,4 +108,16 @@ enum ProjectStatus {
   ON_HOLD
   COMPLETED
   ARCHIVED
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }
