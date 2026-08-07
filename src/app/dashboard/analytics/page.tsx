@@ -119,30 +119,54 @@ export default async function AnalyticsPage() {
 
   return (
     <AppShell userName={session.user.name || session.user.email}>
-      <div className="mx-auto w-full max-w-6xl px-1 pb-12">
+      <div className="mx-auto w-full max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 lg:px-8">
 
         {/* ================================================== */}
         {/* Header */}
         {/* ================================================== */}
 
         <header className="mb-8">
-          <p className="text-sm font-medium text-[var(--muted-foreground)]">
-            Productivity overview
-          </p>
-
-          <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary)]">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 3v18h18"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7 16l4-5 3 3 5-7"
+                    />
+                  </svg>
+                </div>
+
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                  Productivity
+                </span>
+              </div>
+
+              <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
                 Analytics
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted-foreground)]">
-                Understand your workload, progress, and productivity at a
-                glance.
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted-foreground)] sm:text-base">
+                Understand your workload, track your progress, and see how
+                your productivity is evolving.
               </p>
             </div>
 
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--muted-foreground)]">
+            <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-xs font-medium text-[var(--muted-foreground)] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
               Last 7 days
             </div>
           </div>
@@ -152,26 +176,30 @@ export default async function AnalyticsPage() {
         {/* Metric Cards */}
         {/* ================================================== */}
 
-        <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <section className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
 
           <MetricCard
             label="Total tasks"
             value={total}
             description={`${active} still active`}
+            tone="neutral"
+            icon="tasks"
           />
 
           <MetricCard
             label="Completed"
             value={completed}
             description={`${completionRate}% completion rate`}
-            accent="success"
+            tone="success"
+            icon="check"
           />
 
           <MetricCard
             label="In progress"
             value={inProgress}
             description={`${todo} waiting to start`}
-            accent="accent"
+            tone="blue"
+            icon="progress"
           />
 
           <MetricCard
@@ -182,7 +210,8 @@ export default async function AnalyticsPage() {
                 ? "You're all caught up"
                 : "Needs your attention"
             }
-            accent={overdue > 0 ? "destructive" : undefined}
+            tone={overdue > 0 ? "danger" : "neutral"}
+            icon="alert"
           />
 
         </section>
@@ -191,24 +220,42 @@ export default async function AnalyticsPage() {
         {/* Main Insight Row */}
         {/* ================================================== */}
 
-        <section className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <section className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-5">
 
           {/* Completion */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 lg:col-span-2">
-
+          <div className="rounded-2xl border border-emerald-500/15 bg-[var(--card)] p-6 shadow-sm lg:col-span-2">
             <div>
-              <h2 className="text-sm font-semibold">
-                Overall progress
-              </h2>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                    Overall progress
+                  </h2>
 
-              <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                How much of your workload is complete.
-              </p>
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Your overall task completion rate.
+                  </p>
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-8 flex items-center justify-center">
-              <div className="relative h-44 w-44">
-
+            <div className="mt-8 flex justify-center">
+              <div className="relative h-48 w-48">
                 <svg
                   className="h-full w-full -rotate-90"
                   viewBox="0 0 36 36"
@@ -223,7 +270,7 @@ export default async function AnalyticsPage() {
                   <path
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
-                    stroke="var(--accent)"
+                    stroke="#10b981"
                     strokeWidth="2.5"
                     strokeDasharray={`${completionRate}, 100`}
                     strokeLinecap="round"
@@ -231,22 +278,20 @@ export default async function AnalyticsPage() {
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-semibold tracking-tight">
+                  <span className="text-4xl font-bold tracking-tight text-[var(--foreground)]">
                     {completionRate}%
                   </span>
 
-                  <span className="mt-1 text-xs text-[var(--muted-foreground)]">
+                  <span className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     completed
                   </span>
                 </div>
-
               </div>
             </div>
 
             <div className="mt-7 grid grid-cols-2 divide-x divide-[var(--border)] border-t border-[var(--border)] pt-5 text-center">
-
               <div>
-                <p className="text-lg font-semibold">
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                   {completed}
                 </p>
 
@@ -256,7 +301,7 @@ export default async function AnalyticsPage() {
               </div>
 
               <div>
-                <p className="text-lg font-semibold">
+                <p className="text-xl font-bold text-[var(--foreground)]">
                   {active}
                 </p>
 
@@ -264,13 +309,11 @@ export default async function AnalyticsPage() {
                   Remaining
                 </p>
               </div>
-
             </div>
           </div>
 
           {/* Status */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 lg:col-span-3">
-
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm lg:col-span-3">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-sm font-semibold">
@@ -278,17 +321,16 @@ export default async function AnalyticsPage() {
                 </h2>
 
                 <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                  Current distribution across your workflow.
+                  See how your tasks are distributed across the workflow.
                 </p>
               </div>
 
-              <span className="text-xs text-[var(--muted-foreground)]">
+              <span className="rounded-lg bg-[var(--muted)] px-2.5 py-1 text-xs font-medium text-[var(--muted-foreground)]">
                 {total} total
               </span>
             </div>
 
-            <div className="mt-7 space-y-6">
-
+            <div className="mt-8 space-y-6">
               <StatusBar
                 label="To Do"
                 count={todo}
@@ -316,7 +358,6 @@ export default async function AnalyticsPage() {
                 total={total}
                 indicator="bg-emerald-500"
               />
-
             </div>
           </div>
         </section>
@@ -326,19 +367,18 @@ export default async function AnalyticsPage() {
         {/* ================================================== */}
 
         <section className="mb-8">
-
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-base font-semibold">
+              <h2 className="text-lg font-semibold tracking-tight">
                 Activity overview
               </h2>
 
               <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                Task creation and completion over the past week.
+                Task creation and completion during the past week.
               </p>
             </div>
 
-            <div className="hidden items-center gap-4 text-xs text-[var(--muted-foreground)] sm:flex">
+            <div className="flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
                 Created
@@ -351,13 +391,13 @@ export default async function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
 
-            {/* Created */}
             <ChartCard
               title="Tasks created"
               total={createdLast7Days}
               subtitle="created this week"
+              tone="accent"
             >
               <BarChart
                 data={createdPerDay}
@@ -366,11 +406,11 @@ export default async function AnalyticsPage() {
               />
             </ChartCard>
 
-            {/* Completed */}
             <ChartCard
               title="Tasks completed"
               total={completedLast7Days}
               subtitle="completed this week"
+              tone="success"
             >
               <BarChart
                 data={completedPerDay}
@@ -386,21 +426,21 @@ export default async function AnalyticsPage() {
         {/* Priority Distribution */}
         {/* ================================================== */}
 
-        <section className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
 
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-sm font-semibold">
+              <h2 className="text-lg font-semibold tracking-tight">
                 Priority distribution
               </h2>
 
               <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                See how your workload is distributed by urgency.
+                Understand how your workload is distributed by urgency.
               </p>
             </div>
 
             <span className="text-xs text-[var(--muted-foreground)]">
-              {total} tasks
+              {total} total tasks
             </span>
           </div>
 
@@ -437,6 +477,8 @@ export default async function AnalyticsPage() {
           </div>
         </section>
 
+        {/* Bottom spacing */}
+        <div className="h-8" />
       </div>
     </AppShell>
   );
@@ -450,39 +492,121 @@ function MetricCard({
   label,
   value,
   description,
-  accent,
+  tone,
+  icon,
 }: {
   label: string;
   value: number;
   description: string;
-  accent?: "success" | "accent" | "destructive";
+  tone: "neutral" | "success" | "blue" | "danger";
+  icon: "tasks" | "check" | "progress" | "alert";
 }) {
-  const valueColor =
-    accent === "success"
-      ? "text-emerald-600 dark:text-emerald-400"
-      : accent === "destructive"
-        ? "text-red-600 dark:text-red-400"
-        : accent === "accent"
-          ? "text-blue-600 dark:text-blue-400"
-          : "text-[var(--foreground)]";
+  const styles = {
+    neutral: {
+      value: "text-[var(--foreground)]",
+      icon: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400",
+    },
+    success: {
+      value: "text-emerald-600 dark:text-emerald-400",
+      icon: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    },
+    blue: {
+      value: "text-blue-600 dark:text-blue-400",
+      icon: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    },
+    danger: {
+      value: "text-red-600 dark:text-red-400",
+      icon: "bg-red-500/10 text-red-600 dark:text-red-400",
+    },
+  };
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 transition-colors hover:bg-[var(--muted)]/30">
+    <div className="group rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium text-[var(--muted-foreground)]">
+            {label}
+          </p>
 
-      <p className="text-xs font-medium text-[var(--muted-foreground)]">
-        {label}
-      </p>
+          <p
+            className={`mt-3 text-3xl font-bold tracking-tight ${styles[tone].value}`}
+          >
+            {value}
+          </p>
+        </div>
 
-      <p
-        className={`mt-3 text-3xl font-semibold tracking-tight ${valueColor}`}
-      >
-        {value}
-      </p>
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${styles[tone].icon}`}
+        >
+          {icon === "check" && (
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          )}
 
-      <p className="mt-1.5 text-xs text-[var(--muted-foreground)]">
+          {icon === "tasks" && (
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7h-2M9 5a3 3 0 006 0"
+              />
+            </svg>
+          )}
+
+          {icon === "progress" && (
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6"
+              />
+            </svg>
+          )}
+
+          {icon === "alert" && (
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v4m0 4h.01M10.3 4.4l-7.1 12.3A2 2 0 005 20h14a2 2 0 001.8-3.3L13.7 4.4a2 2 0 00-3.4 0z"
+              />
+            </svg>
+          )}
+        </div>
+      </div>
+
+      <p className="mt-3 text-xs text-[var(--muted-foreground)]">
         {description}
       </p>
-
     </div>
   );
 }
@@ -507,28 +631,26 @@ function StatusBar({
 
   return (
     <div>
-
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${indicator}`} />
+          <span className={`h-2.5 w-2.5 rounded-full ${indicator}`} />
 
           <span className="text-sm font-medium">
             {label}
           </span>
         </div>
 
-        <span className="text-xs text-[var(--muted-foreground)]">
+        <span className="text-xs font-medium text-[var(--muted-foreground)]">
           {count} · {percentage}%
         </span>
       </div>
 
       <div className="h-2 overflow-hidden rounded-full bg-[var(--muted)]">
         <div
-          className={`h-full rounded-full ${indicator} transition-all duration-500`}
+          className={`h-full rounded-full ${indicator} transition-all duration-700`}
           style={{ width: `${percentage}%` }}
         />
       </div>
-
     </div>
   );
 }
@@ -541,16 +663,23 @@ function ChartCard({
   title,
   total,
   subtitle,
+  tone,
   children,
 }: {
   title: string;
   total: number;
   subtitle: string;
+  tone: "accent" | "success";
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-
+    <div
+      className={`rounded-2xl border bg-[var(--card)] p-6 shadow-sm ${
+        tone === "success"
+          ? "border-emerald-500/15"
+          : "border-[var(--border)]"
+      }`}
+    >
       <div className="flex items-end justify-between">
         <div>
           <h3 className="text-sm font-semibold">
@@ -562,7 +691,13 @@ function ChartCard({
           </p>
         </div>
 
-        <span className="text-2xl font-semibold tracking-tight">
+        <span
+          className={`text-2xl font-bold tracking-tight ${
+            tone === "success"
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-[var(--foreground)]"
+          }`}
+        >
           {total}
         </span>
       </div>
@@ -570,7 +705,6 @@ function ChartCard({
       <div className="mt-7">
         {children}
       </div>
-
     </div>
   );
 }
@@ -593,13 +727,12 @@ function BarChart({
   barClass: string;
 }) {
   return (
-    <div className="flex h-44 items-end gap-2 sm:gap-3">
-
+    <div className="flex h-48 items-end gap-2 sm:gap-3">
       {data.map((day) => {
         const height =
           day.count === 0
             ? 3
-            : Math.max((day.count / max) * 100, 7);
+            : Math.max((day.count / max) * 100, 8);
 
         return (
           <div
@@ -607,27 +740,24 @@ function BarChart({
             className="group flex h-full flex-1 flex-col items-center justify-end"
           >
             <div className="relative flex w-full flex-1 items-end justify-center">
-
               <div
-                className={`w-full max-w-10 rounded-t-md ${barClass} opacity-75 transition-all duration-300 group-hover:opacity-100`}
+                className={`w-full max-w-12 rounded-t-lg ${barClass} opacity-75 transition-all duration-300 group-hover:opacity-100 group-hover:brightness-110`}
                 style={{
                   height: `${height}%`,
                 }}
               />
 
-              <div className="absolute bottom-full mb-2 hidden rounded-md border border-[var(--border)] bg-[var(--foreground)] px-2 py-1 text-[10px] font-medium text-[var(--background)] shadow-sm group-hover:block">
-                {day.count}
+              <div className="absolute bottom-full mb-2 hidden rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-2.5 py-1.5 text-[10px] font-semibold text-[var(--background)] shadow-lg group-hover:block">
+                {day.count} {day.count === 1 ? "task" : "tasks"}
               </div>
-
             </div>
 
-            <span className="mt-3 text-[11px] text-[var(--muted-foreground)]">
+            <span className="mt-3 text-[11px] font-medium text-[var(--muted-foreground)]">
               {day.label}
             </span>
           </div>
         );
       })}
-
     </div>
   );
 }
@@ -651,37 +781,58 @@ function PriorityCard({
     total === 0 ? 0 : Math.round((count / total) * 100);
 
   const styles = {
-    neutral:
-      "border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50",
-    blue:
-      "border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30",
-    orange:
-      "border-orange-200 bg-orange-50/50 dark:border-orange-900 dark:bg-orange-950/30",
-    red:
-      "border-red-200 bg-red-50/50 dark:border-red-900 dark:bg-red-950/30",
+    neutral: {
+      card: "border-zinc-200 bg-zinc-50/70 dark:border-zinc-800 dark:bg-zinc-900/40",
+      dot: "bg-zinc-400",
+      text: "text-zinc-600 dark:text-zinc-400",
+    },
+
+    blue: {
+      card: "border-blue-200 bg-blue-50/50 dark:border-blue-900/60 dark:bg-blue-950/20",
+      dot: "bg-blue-500",
+      text: "text-blue-600 dark:text-blue-400",
+    },
+
+    orange: {
+      card: "border-orange-200 bg-orange-50/50 dark:border-orange-900/60 dark:bg-orange-950/20",
+      dot: "bg-orange-500",
+      text: "text-orange-600 dark:text-orange-400",
+    },
+
+    red: {
+      card: "border-red-200 bg-red-50/50 dark:border-red-900/60 dark:bg-red-950/20",
+      dot: "bg-red-500",
+      text: "text-red-600 dark:text-red-400",
+    },
   };
 
   return (
     <div
-      className={`rounded-lg border p-4 transition-colors hover:bg-[var(--muted)]/30 ${styles[tone]}`}
+      className={`rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${styles[tone].card}`}
     >
-      <p className="text-xs font-medium text-[var(--muted-foreground)]">
-        {label}
-      </p>
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2 w-2 rounded-full ${styles[tone].dot}`}
+        />
 
-      <div className="mt-3 flex items-end justify-between gap-2">
-        <span className="text-2xl font-semibold tracking-tight">
+        <p className="text-xs font-semibold text-[var(--foreground)]">
+          {label}
+        </p>
+      </div>
+
+      <div className="mt-4 flex items-end justify-between gap-2">
+        <span className="text-2xl font-bold tracking-tight">
           {count}
         </span>
 
-        <span className="text-xs text-[var(--muted-foreground)]">
+        <span className={`text-xs font-semibold ${styles[tone].text}`}>
           {percentage}%
         </span>
       </div>
 
-      <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--muted)]">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]">
         <div
-          className="h-full rounded-full bg-current opacity-50"
+          className={`h-full rounded-full ${styles[tone].dot} transition-all duration-500`}
           style={{ width: `${percentage}%` }}
         />
       </div>
