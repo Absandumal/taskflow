@@ -1,6 +1,7 @@
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette } from "@/components/search/CommandPalette";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 export function AppShell({
   children,
@@ -11,12 +12,20 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="pl-64 transition-all duration-300">
-        <Topbar userName={userName} />
-        <main className="p-6 md:p-8">{children}</main>
+      {/* Desktop sidebar only */}
+      <div className="hidden md:block">
+        <Sidebar />
       </div>
+
+      {/* Main area: no left pad on mobile, left pad on desktop */}
+      <div className="md:pl-64">
+        <Topbar userName={userName} />
+        {/* Extra bottom padding on mobile for the nav bar */}
+        <main className="p-4 pb-24 md:p-8 md:pb-8">{children}</main>
+      </div>
+
       <CommandPalette />
+      <MobileBottomNav />
     </div>
   );
 }
