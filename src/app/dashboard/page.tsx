@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { EditTaskModal } from "@/components/tasks/EditTaskModal";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
+import { suggestNextTask } from "@/lib/suggest-next-task";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -35,6 +36,8 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
     take: 8,
   });
+
+  const suggestion = suggestNextTask(tasks);
 
   const firstName = session.user.name?.split(" ")[0] || "there";
   const today = format(new Date(), "EEEE, MMMM d");
@@ -163,6 +166,63 @@ export default async function DashboardPage() {
             </div>
           </div>
         </section>
+
+        {/* Suggested next */}
+        {suggestion && (
+          <section className="mb-8 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+            <div className="border-b border-[var(--border)] px-5 py-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">
+                Suggested next
+              </p>
+              <h2 className="mt-1 text-sm font-semibold">Work on this next</h2>
+            </div>
+
+            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-base font-medium">
+                  {suggestion.task.title}
+                </p>
+
+                {suggestion.task.description && (
+                  <p className="mt-1 line-clamp-2 text-sm text-[var(--muted-foreground)]">
+                    {suggestion.task.description}
+                  </p>
+                )}
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <StatusBadge status={suggestion.task.status} />
+                  <PriorityBadge priority={suggestion.task.priority} />
+                  {suggestion.task.dueDate && (
+                    <span className="text-xs text-[var(--muted-foreground)]">
+                      Due{" "}
+                      {format(new Date(suggestion.task.dueDate), "MMM d")}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {suggestion.reasons.map((reason) => (
+                    <span
+                      key={reason}
+                      className="rounded-md bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]"
+                    >
+                      {reason}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <form action={toggleTask.bind(null, suggestion.task.id)}>
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--primary)] px-5 text-sm font-medium text-[var(--primary-foreground)] transition-opacity hover:opacity-90"
+                >
+                  Mark done
+                </button>
+              </form>
+            </div>
+          </section>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
