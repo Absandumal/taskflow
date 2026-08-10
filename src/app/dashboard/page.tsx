@@ -108,7 +108,7 @@ export default async function DashboardPage() {
               </div>
 
               <h1 className="text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-[2.7rem]">
-                Good morning, {firstName}
+                Welcome, {firstName}
                 <span className="ml-2 inline-block">👋</span>
               </h1>
 
